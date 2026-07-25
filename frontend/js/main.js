@@ -270,18 +270,33 @@ function closeGalleryPage() {
     }
 }
 
-document.getElementById('nav-list').addEventListener('click', () => {
+document.getElementById('nav-list')?.addEventListener('click', () => {
     history.pushState(null, '', '/');
     currentTab = null;
     searchKey = null;
     handleNavigation();
-    galleryGrid.scrollTop = 0;
+    if (galleryGrid) galleryGrid.scrollTop = 0;
 });
-document.getElementById('nav-search').addEventListener('click', () => {
+document.getElementById('gallery-nav-home')?.addEventListener('click', () => {
+    history.pushState(null, '', '/');
+    currentTab = null;
+    searchKey = null;
+    handleNavigation();
+    if (galleryGrid) galleryGrid.scrollTop = 0;
+});
+document.getElementById('gallery-nav-profile')?.addEventListener('click', () => {
+    const p = getBaseUrlParams();
+    if (!['favorites', 'recent', 'frequent'].includes(currentTab)) {
+        p.delete('tab');
+    }
+    history.pushState(null, '', `/?${p.toString()}#profile`);
+    handleNavigation();
+});
+document.getElementById('nav-search')?.addEventListener('click', () => {
     openGalleryPage();
     setTimeout(() => { document.getElementById('video-search').focus(); }, 300);
 });
-document.getElementById('close-gallery-page').addEventListener('click', closeGalleryPage);
+document.getElementById('close-gallery-page')?.addEventListener('click', closeGalleryPage);
 
 titleEl.onclick = async () => {
     if (currentPlayingVideo) {

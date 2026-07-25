@@ -24,7 +24,9 @@
 .close-page {
     font-size: 24px; cursor: pointer; line-height: 1; margin-left: -5px; padding-right: 10px; color: #fff;
 }
-#search-container { padding: 12px 16px; background: #121212; border-bottom: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; position: relative; z-index: 100; }
+#search-container { padding: 12px 16px; background: #121212; border-bottom: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; position: relative; z-index: 100; gap: 12px; }
+.search-icon-btn { font-size: 24px; cursor: pointer; color: #fff; flex-shrink: 0; user-select: none; transition: color 0.2s ease; }
+.search-icon-btn:hover { color: #90caf9; }
 #search-input-wrapper { position: relative; flex-grow: 1; }
 #video-search {
     padding-right: 70px; padding-top: 12px; padding-bottom: 12px;
