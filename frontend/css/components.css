@@ -1,0 +1,80 @@
+.loading {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 18px; z-index: 5; color: #ccc;
+}
+
+.toast {
+    background-color: #323232; color: #fff; padding: 14px 16px; border-radius: 4px;
+    font-size: 0.875rem; font-weight: 400; font-family: "Roboto", "Helvetica", "Arial", sans-serif; box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2),0px 6px 10px 0px rgba(0,0,0,0.14),0px 1px 18px 0px rgba(0,0,0,0.12);
+    transition: all 0.3s ease; opacity: 0; transform: translateY(10px);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background-color: #43a047; }
+.toast.error { background-color: #e53935; }
+.toast.warning { background-color: #fb8c00; }
+.toast.info { background-color: #1e88e5; }
+
+@keyframes heartBeat {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+}
+.animate-heart {
+    animation: heartBeat 0.8s ease-out forwards;
+}
+
+#gallery-tabs::-webkit-scrollbar, #profile-tabs::-webkit-scrollbar, #suggestion-tabs::-webkit-scrollbar { display: none; }
+.mui-tab {
+    flex-shrink: 0; padding: 12px 24px; background: none; border: none; color: rgba(255,255,255,0.6); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif; text-transform: uppercase; font-size: 0.875rem; font-weight: 500;
+    transition: color 250ms, border-color 250ms;
+}
+.mui-tab.active {
+    color: #90caf9;
+    border-bottom-color: #90caf9;
+}
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.87);
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    margin-left: 6px;
+    line-height: 1;
+}
+.mui-tab.active .tab-badge {
+    background: rgba(144, 202, 249, 0.16);
+    color: #90caf9;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.detail-chip {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.23);
+    color: #ddd;
+}
+.chip-maker { border-color: rgba(144, 202, 249, 0.5); color: #90caf9; }
+.chip-actress { border-color: rgba(244, 143, 177, 0.5); color: #f48fb1; }
+.chip-genre { border-color: rgba(129, 199, 132, 0.5); color: #81c784; }
+.chip-title { border-color: rgba(255, 167, 38, 0.5); color: #ffa726; }
+.chip-dvd { border-color: rgba(186, 104, 200, 0.5); color: #ba68c8; }
+.chip-maker:hover, .chip-actress:hover, .chip-genre:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.87);
+    color: rgba(255,255,255,0.87);
+}

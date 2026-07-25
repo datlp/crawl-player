@@ -33,7 +33,7 @@ builtins.custom_log = custom_log
 try:
     from curl_cffi import requests as curl_requests
     from bs4 import BeautifulSoup
-    from flask import Flask, request, jsonify, Response, make_response
+    from flask import Flask, request, jsonify, Response, make_response, send_from_directory
     import psutil
     custom_log("System", "✔️ Kiểm tra đủ package cơ bản...")
 except ImportError as e:
@@ -1951,9 +1951,18 @@ def history_record():
 @app.route('/<path:path>')
 def serve_html(path):
     try:
-        html_path = 'index.html'
-        if not os.path.isabs(html_path):
-            html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), html_path)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        frontend_dir = os.path.join(base_dir, 'frontend')
+
+        if path:
+            file_path = os.path.join(frontend_dir, path)
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                return send_from_directory(frontend_dir, path)
+
+        html_path = os.path.join(frontend_dir, 'index.html')
+        if not os.path.exists(html_path):
+            html_path = os.path.join(base_dir, 'index.html')
+
         with open(html_path, 'rb') as f:
             content = f.read()
 
