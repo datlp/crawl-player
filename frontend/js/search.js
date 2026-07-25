@@ -603,7 +603,7 @@ videoSearchInput.addEventListener('keydown', (e) => {
 });
 
 const hideSuggestionsOutside = (e) => {
-    if (!e.target.closest('#search-container')) {
+    if (!e.target.closest('#video-search') && !e.target.closest('#suggestion-tabs') && !e.target.closest('.suggestion-item') && !e.target.closest('.detail-chip')) {
         const sug = document.getElementById('search-suggestions');
         if (sug) sug.style.display = 'none';
     }
