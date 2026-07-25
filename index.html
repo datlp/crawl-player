@@ -72,13 +72,13 @@
         .video-js { width: 100%; height: 100%; background-color: transparent; }
         .vjs-tech { object-fit: contain; }
         #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 126px);
+            position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 70px);
             z-index: 10; touch-action: none;
             -webkit-touch-callout: none;
             user-select: none;
         }
         #bottom-bar {
-            position: absolute; bottom: 56px; left: 0; width: 100%; padding: 10px 15px; height: 70px;
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px 15px; height: 70px;
             box-sizing: border-box; background: rgba(0, 0, 0, 0.7);
             z-index: 20; display: flex; flex-direction: column; justify-content: center;
         }
@@ -102,7 +102,7 @@
         }
         
         #action-icons {
-            position: absolute; right: 0px; bottom: 140px;
+            position: absolute; right: 0px; bottom: 84px;
             display: flex; flex-direction: column; gap: 12px; z-index: 20;
         }
         .action-btn {
@@ -110,40 +110,34 @@
             display: flex; justify-content: center; align-items: center; cursor: pointer;
             font-size: 16px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);
             color: #fff; text-shadow: 1px 1px 2px #000; backdrop-filter: blur(4px);
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .action-btn:active { background: rgba(255,255,255,0.3); }
+        .action-btn.active {
+            color: #90caf9;
+            border-color: rgba(144, 202, 249, 0.5);
+            background: rgba(0,0,0,0.5);
+        }
         .hide-ui #bottom-bar,
         .hide-ui #action-icons,
-        .hide-ui #bottom-navigation,
-        .hide-ui .media-counter {
+        .hide-ui #nav-search {
             opacity: 0;
             pointer-events: none;
         }
-        #bottom-bar, #action-icons, #bottom-navigation, .media-counter {
+        #bottom-bar, #action-icons, #nav-search {
             transition: opacity 0.3s ease;
         }
-        
-        #bottom-navigation {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 56px;
-            background: #1e1e1e;
-            z-index: 50; display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.12);
+
+        #nav-search {
+            position: absolute; top: 15px; right: 15px; z-index: 20;
         }
-        .bottom-nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: rgba(255,255,255,0.6); cursor: pointer; flex: 1; height: 100%;
-            transition: color 0.3s;
-        }
-        .bottom-nav-item.active { color: #90caf9; }
-        .bottom-nav-item .material-symbols-outlined { font-size: 24px; margin-bottom: 2px; }
-        .bottom-nav-item span:last-child { font-size: 0.6875rem; font-weight: 500; }
 
         .page-view {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: calc(100% - 56px);
+            height: 100%;
             background-color: #121212;
             z-index: 40;
             display: none;
@@ -249,11 +243,7 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: 18px; z-index: 5; color: #ccc;
         }
-        .media-counter {
-            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6);
-            padding: 5px 12px; border-radius: 20px; font-size: 13px; z-index: 20; font-weight: bold;
-            cursor: pointer;
-        }
+
         .toast {
             background-color: #323232; color: #fff; padding: 14px 16px; border-radius: 4px;
             font-size: 0.875rem; font-weight: 400; font-family: "Roboto", "Helvetica", "Arial", sans-serif; box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2),0px 6px 10px 0px rgba(0,0,0,0.14),0px 1px 18px 0px rgba(0,0,0,0.12);
@@ -347,74 +337,6 @@
         .item-view-count .material-symbols-outlined { font-size: 14px; }
 
         @media (orientation: landscape) {
-            #bottom-navigation {
-                top: 0; left: 0; bottom: auto;
-                width: 80px; height: 100%;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 16px;
-                border-top: none;
-                border-right: none;
-                background: transparent;
-                pointer-events: none;
-                z-index: 20;
-                transition: background-color 0.3s ease, border-color 0.3s ease;
-            }
-            #app:has(.page-view.active) #bottom-navigation {
-                background: #121212;
-                z-index: 50;
-                pointer-events: auto;
-                border-right: 1px solid rgba(255, 255, 255, 0.12);
-            }
-            .bottom-nav-item {
-                flex: none;
-                pointer-events: auto;
-                width: 48px; height: 48px;
-                border-radius: 50%;
-                background: rgba(0,0,0,0.3);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: #fff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(4px);
-                box-shadow: 0px 4px 6px rgba(0,0,0,0.15);
-                transition: background 0.2s, color 0.2s, transform 0.2s;
-            }
-            .bottom-nav-item:active {
-                background: rgba(255,255,255,0.3);
-            }
-            .bottom-nav-item.active {
-                color: #90caf9;
-                border-color: rgba(144, 202, 249, 0.5);
-                background: rgba(0,0,0,0.5);
-            }
-            #app:has(.page-view.active) #bottom-navigation .bottom-nav-item {
-                background: transparent;
-                border-color: transparent;
-                box-shadow: none;
-                backdrop-filter: none;
-            }
-            #app:has(.page-view.active) #bottom-navigation .bottom-nav-item:active {
-                background: rgba(255, 255, 255, 0.08);
-            }
-            #app:has(.page-view.active) #bottom-navigation .bottom-nav-item.active {
-                color: #90caf9;
-                background: transparent;
-                border-color: transparent;
-            }
-            .bottom-nav-item span:last-child {
-                display: none;
-            }
-            .page-view {
-                left: 80px;
-                width: calc(100% - 80px);
-                height: 100%;
-            }
-            #search-suggestions {
-                left: 80px;
-            }
             #bottom-bar {
                 bottom: 0;
                 left: 0;
@@ -435,7 +357,7 @@
     <div id="app">
         <div id="loading" class="loading" style="display: none;">Đang tải...</div>
         <div id="media-container"></div>
-        <div class="media-counter" id="media-counter">0/0</div>
+        <div class="action-btn" id="nav-search" title="Tìm kiếm"><span class="material-symbols-outlined">search</span></div>
         <div id="overlay"></div>
 
         <div id="bottom-bar">
@@ -584,27 +506,12 @@
         </div>
 
         <div id="action-icons">
+            <div class="action-btn" id="nav-list" title="Trang chủ"><span class="material-symbols-outlined">home</span></div>
+            <div class="action-btn" id="nav-profile" title="Tài khoản"><span class="material-symbols-outlined">person</span></div>
             <div class="action-btn" id="btn-favorite" title="Yêu thích"><span class="material-symbols-outlined" id="fav-icon">favorite_border</span></div>
             <div class="action-btn" id="btn-sync" title="Đồng bộ"><span class="material-symbols-outlined">sync</span></div>
             <div class="action-btn" id="btn-fullscreen" title="Toàn màn hình"><span class="material-symbols-outlined">fullscreen</span></div>
             <div class="action-btn" id="btn-play-pause" title="Play/Pause"><span class="material-symbols-outlined" id="play-pause-icon">play_arrow</span></div>
-            <div class="action-btn" id="btn-prev" title="Video trước"><span class="material-symbols-outlined">skip_previous</span></div>
-            <div class="action-btn" id="btn-next" title="Video sau"><span class="material-symbols-outlined">skip_next</span></div>
-        </div>
-        
-        <div id="bottom-navigation">
-            <div class="bottom-nav-item" id="nav-list">
-                <span class="material-symbols-outlined">home</span>
-                <span>Trang chủ</span>
-            </div>
-            <div class="bottom-nav-item" id="nav-search">
-                <span class="material-symbols-outlined">search</span>
-                <span>Tìm kiếm</span>
-            </div>
-            <div class="bottom-nav-item" id="nav-profile">
-                <span class="material-symbols-outlined">person</span>
-                <span>Tài khoản</span>
-            </div>
         </div>
 
         <div id="fast-seek-indicator" style="display: none; position: absolute; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: bold; color: #fff; z-index: 50; pointer-events: none; backdrop-filter: blur(4px);"></div>
@@ -659,7 +566,6 @@
         const seekBar = document.getElementById('seek-bar');
         const timeDisplay = document.getElementById('time-display');
         const progressContainer = document.getElementById('progress-container');
-        const mediaCounter = document.getElementById('media-counter');
         const galleryPage = document.getElementById('gallery-page');
         const galleryGrid = document.getElementById('gallery-grid');
         const videoSearchInput = document.getElementById('video-search');
@@ -1438,7 +1344,7 @@
         }
 
         function updateBottomNav(activeId) {
-            document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#action-icons .action-btn').forEach(el => el.classList.remove('active'));
             if (activeId) {
                 document.getElementById(activeId)?.classList.add('active');
             }
@@ -2257,7 +2163,6 @@
                     hasMore = false;
                     if (videos.length === 0) {
                         titleEl.innerText = 'Không tìm thấy kết quả';
-                        mediaCounter.innerText = '0/0';
                         if (isProfileTab) {
                             targetGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #888; padding: 20px;">Không có video nào</div>';
                         }
@@ -2293,7 +2198,6 @@
             const video = videos[currentVideoIndex];
             currentPlayingVideo = video;
             titleEl.innerText = video.title;
-            mediaCounter.innerText = `${currentVideoIndex + 1} / ${videos.length}`;
             
             checkFavoriteStatus(video.id);
             
@@ -2502,8 +2406,8 @@
             }
         }
 
-        document.getElementById('btn-next').addEventListener('click', nextVideo);
-        document.getElementById('btn-prev').addEventListener('click', prevVideo);
+        document.getElementById('btn-next')?.addEventListener('click', nextVideo);
+        document.getElementById('btn-prev')?.addEventListener('click', prevVideo);
 
         btnPlayPause.addEventListener('click', () => {
             if (activePlayer) {
@@ -2660,33 +2564,8 @@
             openGalleryPage();
             setTimeout(() => { document.getElementById('video-search').focus(); }, 300);
         });
-        mediaCounter.addEventListener('click', openGalleryPage);
         document.getElementById('close-gallery-page').addEventListener('click', closeGalleryPage);
 
-        let bnavStartX = 0;
-        let bnavStartY = 0;
-        const bnavOrder = ['nav-list', 'nav-search', 'nav-profile'];
-        const bottomNavEl = document.getElementById('bottom-navigation');
-
-        bottomNavEl.addEventListener('touchstart', e => {
-            bnavStartX = e.changedTouches[0].clientX;
-            bnavStartY = e.changedTouches[0].clientY;
-        }, {passive: true});
-
-        bottomNavEl.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - bnavStartX;
-            const dy = e.changedTouches[0].clientY - bnavStartY;
-            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-                const currentActive = bottomNavEl.querySelector('.bottom-nav-item.active');
-                let currentIndex = currentActive ? bnavOrder.indexOf(currentActive.id) : 0;
-                
-                if (dx > 0 && currentIndex > 0) { 
-                    document.getElementById(bnavOrder[currentIndex - 1]).click();
-                } else if (dx < 0 && currentIndex < bnavOrder.length - 1) { 
-                    document.getElementById(bnavOrder[currentIndex + 1]).click();
-                }
-            }
-        }, {passive: true});
 
         let wasHolding = false;
         let holdResetTimeout;
