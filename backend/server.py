@@ -1952,7 +1952,7 @@ def history_record():
 def serve_html(path):
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        frontend_dir = os.path.join(base_dir, 'frontend')
+        frontend_dir = os.path.abspath(os.path.join(base_dir, '..', 'frontend'))
 
         if path:
             file_path = os.path.join(frontend_dir, path)
@@ -1960,8 +1960,6 @@ def serve_html(path):
                 return send_from_directory(frontend_dir, path)
 
         html_path = os.path.join(frontend_dir, 'index.html')
-        if not os.path.exists(html_path):
-            html_path = os.path.join(base_dir, 'index.html')
 
         with open(html_path, 'rb') as f:
             content = f.read()
@@ -2037,7 +2035,8 @@ def start_reloader():
     threading.Thread(target=reloader_thread, daemon=True).start()
 
 def load_source_module(source_name):
-    file_path = f"./source-{source_name}.py"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, f"source-{source_name}.py")
     if not os.path.exists(file_path):
         custom_log("System", f"❌ Lỗi: Không tìm thấy file {file_path}")
         sys.exit(1)
