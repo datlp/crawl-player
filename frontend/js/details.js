@@ -90,6 +90,56 @@ async function showVideoDetail(index, fallbackVideo = null) {
         document.getElementById('details-desc').innerText = '';
     }
     
+    function getSourceInfo(v) {
+        if (!v) return { name: 'Trang gốc', domain: '', url: '#' };
+        let url = (v.url || '').trim();
+        let domain = (v.domain || '').trim();
+        let source = (v.source || '').trim();
+
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            try {
+                const parsed = new URL(url);
+                if (!domain) domain = parsed.hostname;
+            } catch(e) {}
+        }
+
+        let cleanDomain = domain ? domain.replace(/^www\./i, '') : '';
+
+        if (!source) {
+            if (cleanDomain) {
+                if (cleanDomain.includes('javtiful')) source = 'Javtiful';
+                else if (cleanDomain.includes('missav')) source = 'MissAV';
+                else if (cleanDomain.includes('vlxx')) source = 'VLXX';
+                else if (cleanDomain.includes('sextop1')) source = 'Sextop1';
+                else if (cleanDomain.includes('javguru')) source = 'JavGuru';
+                else source = cleanDomain;
+            } else {
+                source = 'Trang gốc';
+            }
+        }
+
+        let displayName = source || cleanDomain || 'Trang gốc';
+        let targetUrl = url;
+        if (!targetUrl) {
+            const baseDomain = cleanDomain || 'javtiful.com';
+            const srcLower = (source || '').toLowerCase();
+            if (srcLower.includes('missav')) {
+                targetUrl = `https://${baseDomain}/vi/v/${v.id}`;
+            } else {
+                targetUrl = `https://${baseDomain}/video/${v.id}`;
+            }
+        } else if (targetUrl.startsWith('/')) {
+            const baseDomain = cleanDomain || 'javtiful.com';
+            targetUrl = `https://${baseDomain}${targetUrl}`;
+        }
+
+        return {
+            name: displayName,
+            domain: cleanDomain,
+            url: targetUrl
+        };
+    }
+
     const setupButtons = (v) => {
         document.getElementById('btn-watch-now').onclick = () => {
             const p = getBaseUrlParams();
@@ -97,7 +147,14 @@ async function showVideoDetail(index, fallbackVideo = null) {
             history.pushState(null, '', `/?${p.toString()}`);
             handleNavigation();
         };
-        document.getElementById('btn-open-javtiful').onclick = () => window.open(v.url || `https://javtiful.com/video/${v.id}`, '_blank');
+
+        const srcInfo = getSourceInfo(v);
+        const btnOpen = document.getElementById('btn-open-javtiful');
+        if (btnOpen) {
+            btnOpen.innerHTML = `<span class="material-symbols-outlined">language</span> ${srcInfo.name}`;
+            btnOpen.onclick = () => window.open(srcInfo.url, '_blank');
+        }
+
         document.getElementById('btn-search-list').onclick = () => {
             const p = getBaseUrlParams();
             p.set('id', v.id);

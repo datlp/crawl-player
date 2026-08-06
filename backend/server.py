@@ -993,7 +993,9 @@ def get_videos():
                 "genre": row[6] if len(row) > 6 else '',
                 "maker": row[7] if len(row) > 7 else '',
                 "details": row[8] if len(row) > 8 else '',
-                "dvd": row[9] if len(row) > 9 else ''
+                "dvd": row[9] if len(row) > 9 else '',
+                "source": getattr(scraper_instance, 'source_name', app_args.source),
+                "domain": getattr(scraper_instance, 'domain', '')
             })
         return jsonify({"items": videos, "total": total, "page": page})
     except sqlite3.OperationalError as e:
@@ -1067,7 +1069,9 @@ def get_related():
                 "genre": row[6] if row[6] else '',
                 "maker": row[7] if row[7] else '',
                 "details": row[8] if row[8] else '',
-                "dvd": row[9] if len(row) > 9 and row[9] else ''
+                "dvd": row[9] if len(row) > 9 and row[9] else '',
+                "source": getattr(scraper_instance, 'source_name', app_args.source),
+                "domain": getattr(scraper_instance, 'domain', '')
             })
         return jsonify({"items": videos})
     except sqlite3.OperationalError as e:
@@ -1387,7 +1391,9 @@ def video_details_api():
                 "genre": row[6] if row[6] else '',
                 "maker": row[7] if row[7] else '',
                 "details": row[8] if row[8] else '',
-                "dvd": row[9] if row[9] else ''
+                "dvd": row[9] if row[9] else '',
+                "source": getattr(scraper_instance, 'source_name', app_args.source),
+                "domain": getattr(scraper_instance, 'domain', '')
             }
         })
     return jsonify({"success": False, "error": "Not found"})
