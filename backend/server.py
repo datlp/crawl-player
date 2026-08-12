@@ -791,6 +791,7 @@ def get_counts():
                 
                 count_fav = 0
                 count_recent = 0
+                count_unwatched = 0
                 if identifier:
                     where_fav = "WHERE f.username = ?" + (f" AND {search_where_v}" if search_where_v else "")
                     cursor.execute(f"SELECT COUNT(*) FROM {from_main} JOIN favorites f ON f.video_id = v.id {where_fav}", [identifier] + search_params)
@@ -799,6 +800,12 @@ def get_counts():
                     where_hist = "WHERE h.username = ?" + (f" AND {search_where_v}" if search_where_v else "")
                     cursor.execute(f"SELECT COUNT(*) FROM {from_main} JOIN history h ON h.video_id = v.id {where_hist}", [identifier] + search_params)
                     count_recent = cursor.fetchone()[0]
+
+                    where_unwatched = "WHERE h.video_id IS NULL" + (f" AND {search_where_v}" if search_where_v else "")
+                    cursor.execute(f"SELECT COUNT(*) FROM {from_main} LEFT JOIN history h ON h.video_id = v.id AND h.username = ? {where_unwatched}", [identifier] + search_params)
+                    count_unwatched = cursor.fetchone()[0]
+                else:
+                    count_unwatched = count_all
                 
                 where_glob = ("WHERE " + search_where_v) if search_where_v else ""
                 cursor.execute(f"SELECT COUNT(DISTINCT h.video_id) FROM {from_main} JOIN history h ON h.video_id = v.id {where_glob}", search_params)
@@ -835,6 +842,7 @@ def get_counts():
             "recent": count_recent,
             "frequent": count_recent,
             "global_frequent": count_global,
+            "unwatched": count_unwatched,
             "related": count_related,
             "trending_day": 0,
             "trending_month": 0
@@ -842,7 +850,7 @@ def get_counts():
     except sqlite3.OperationalError as e:
         if 'interrupted' in str(e).lower():
             custom_log("API", "⚠️ Query timeout trong /api/counts (>2s). Bỏ qua.")
-            return jsonify({"all": 0, "favorites": 0, "recent": 0, "frequent": 0, "global_frequent": 0, "related": 0, "trending_day": 0, "trending_month": 0})
+            return jsonify({"all": 0, "favorites": 0, "recent": 0, "frequent": 0, "global_frequent": 0, "unwatched": 0, "related": 0, "trending_day": 0, "trending_month": 0})
         raise
 
 
@@ -878,6 +886,13 @@ def get_videos():
                     params.append(identifier)
                 elif tab == 'global_frequent':
                     from_clause = f"{VIDEOS_TABLE} v JOIN (SELECT video_id, SUM(watch_count) as total_watches FROM history GROUP BY video_id) h ON v.id = h.video_id"
+                elif tab == 'unwatched':
+                    if identifier:
+                        from_clause = f"{VIDEOS_TABLE} v LEFT JOIN history h ON v.id = h.video_id AND h.username = ?"
+                        where_clauses.append("h.video_id IS NULL")
+                        params.append(identifier)
+                    else:
+                        from_clause = f"{VIDEOS_TABLE} v"
                 elif tab == 'trending_day':
                     day_ago = int(time.time()) - 86400
                     from_clause = f"{VIDEOS_TABLE} v JOIN (SELECT video_id, COUNT(*) as c FROM history_logs WHERE watched_at > ? GROUP BY video_id) h ON v.id = h.video_id"

@@ -50,6 +50,7 @@ const fastSeekIndicator = document.getElementById('fast-seek-indicator');
 const tabMapping = {
     'all': 'tabAll',
     'global_frequent': 'tabGlobalFrequent',
+    'unwatched': 'tabUnwatched',
     'related': 'tabRelated',
     'favorites': 'tabProfileFav',
     'recent': 'tabProfileRecent',

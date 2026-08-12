@@ -54,7 +54,7 @@ async function fetchTabCounts() {
         const relatedVidId = new URLSearchParams(window.location.search).get('id') || (currentPlayingVideo ? currentPlayingVideo.id : '');
         const res = await apiFetch(`/api/counts?search_key=${encodeURIComponent(searchKey || '')}&video_id=${encodeURIComponent(relatedVidId)}`);
         if (res) {
-            const keys = ['all', 'favorites', 'recent', 'frequent', 'global_frequent', 'related'];
+            const keys = ['all', 'favorites', 'recent', 'frequent', 'global_frequent', 'unwatched', 'related'];
             keys.forEach(key => {
                 const badge = document.getElementById(`badge-${key}`);
                 if (badge) {
@@ -195,7 +195,7 @@ async function fetchVideos() {
 
 let galleryStartX = 0;
 let galleryStartY = 0;
-const galleryTabsOrder = ['all', 'global_frequent', 'related'];
+const galleryTabsOrder = ['all', 'global_frequent', 'unwatched', 'related'];
 galleryPage.addEventListener('touchstart', e => {
     galleryStartX = e.changedTouches[0].clientX;
     galleryStartY = e.changedTouches[0].clientY;
