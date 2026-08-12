@@ -773,17 +773,27 @@ def get_counts():
                     if match_field:
                         field = match_field.group(1).lower()
                         val = match_field.group(2).strip()
-                        safe_val = ' '.join([f'"{w}"*' for w in val.replace('"', '').split()])
-                        if safe_val:
+                        raw_parts = [p.strip() for p in val.split(',') if p.strip()]
+                        field_terms = []
+                        for part in raw_parts:
+                            safe_val = ' '.join([f'"{w}"*' for w in part.replace('"', '').split()])
+                            if safe_val:
+                                field_terms.append(f"{field} : ({safe_val})")
+                        if field_terms:
                             from_main = f"{VIDEOS_TABLE}_fts JOIN {VIDEOS_TABLE} v ON v.rowid = {VIDEOS_TABLE}_fts.rowid"
                             search_where_v = f"{VIDEOS_TABLE}_fts MATCH ?"
-                            search_params.append(f"{field} : ({safe_val})")
+                            search_params.append(' OR '.join(field_terms))
                     else:
-                        safe_key = ' '.join([f'"{w}"*' for w in search_key.replace('"', '').split()])
-                        if safe_key:
+                        raw_parts = [p.strip() for p in search_key.split(',') if p.strip()]
+                        key_terms = []
+                        for part in raw_parts:
+                            safe_k = ' '.join([f'"{w}"*' for w in part.replace('"', '').split()])
+                            if safe_k:
+                                key_terms.append(f"({safe_k})")
+                        if key_terms:
                             from_main = f"{VIDEOS_TABLE}_fts JOIN {VIDEOS_TABLE} v ON v.rowid = {VIDEOS_TABLE}_fts.rowid"
                             search_where_v = f"{VIDEOS_TABLE}_fts MATCH ?"
-                            search_params.append(safe_key)
+                            search_params.append(' OR '.join(key_terms))
         
                 where_all = ("WHERE " + search_where_v) if search_where_v else ""
                 cursor.execute(f"SELECT COUNT(*) FROM {from_main} {where_all}", search_params)
@@ -950,15 +960,27 @@ def get_videos():
                     if match_field:
                         field = match_field.group(1).lower()
                         val = match_field.group(2).strip()
-                        safe_val = ' '.join([f'"{w}"*' for w in val.replace('"', '').split()])
-                        if safe_val:
-                            fts_terms.append(f"({field} : ({safe_val}))")
-                            safe_key = f"{field} : ({safe_val})"
+                        raw_parts = [p.strip() for p in val.split(',') if p.strip()]
+                        field_terms = []
+                        for part in raw_parts:
+                            safe_val = ' '.join([f'"{w}"*' for w in part.replace('"', '').split()])
+                            if safe_val:
+                                field_terms.append(f"{field} : ({safe_val})")
+                        if field_terms:
+                            fts_or_clause = ' OR '.join(field_terms)
+                            fts_terms.append(f"({fts_or_clause})")
+                            safe_key = fts_or_clause
                     else:
-                        safe_key_fmt = ' '.join([f'"{w}"*' for w in search_key.replace('"', '').split()])
-                        if safe_key_fmt:
-                            fts_terms.append(f"({safe_key_fmt})")
-                            safe_key = safe_key_fmt
+                        raw_parts = [p.strip() for p in search_key.split(',') if p.strip()]
+                        key_terms = []
+                        for part in raw_parts:
+                            safe_k = ' '.join([f'"{w}"*' for w in part.replace('"', '').split()])
+                            if safe_k:
+                                key_terms.append(f"({safe_k})")
+                        if key_terms:
+                            fts_or_clause = ' OR '.join(key_terms)
+                            fts_terms.append(f"({fts_or_clause})")
+                            safe_key = fts_or_clause
                             
                 if fts_terms:
                     from_clause += f" JOIN {VIDEOS_TABLE}_fts ON v.rowid = {VIDEOS_TABLE}_fts.rowid"
@@ -1531,12 +1553,20 @@ def search_suggestions():
                     return jsonify({"success": True, "suggestions": suggestions})
                 
                 else:
-                    words = q.replace('"', '').split()
-                    if not words:
+                    raw_parts = [p.strip() for p in q.split(',') if p.strip()]
+                    or_parts = []
+                    and_parts = []
+                    for part in raw_parts:
+                        w_list = part.replace('"', '').split()
+                        if w_list:
+                            and_parts.append('(' + ' AND '.join([f'"{w}"*' for w in w_list]) + ')')
+                            or_parts.append('(' + ' OR '.join([f'"{w}"*' for w in w_list]) + ')')
+                    
+                    if not or_parts:
                         return jsonify({"success": True, "suggestions": suggestions})
                         
-                    safe_key_and = ' AND '.join([f'"{w}"*' for w in words])
-                    safe_key_or = ' OR '.join([f'"{w}"*' for w in words])
+                    safe_key_and = ' OR '.join(and_parts)
+                    safe_key_or = ' OR '.join(or_parts)
                     
                     try:
                         cursor.execute('''
@@ -1594,8 +1624,7 @@ def search_suggestions():
                     match_watch_history = []
                     if identifier:
                         try:
-                            fts_query_for_history = ' '.join([f'"{w}"*' for w in q.replace('"', '').split()])
-                            if fts_query_for_history:
+                            if safe_key_or:
                                 cursor.execute(f'''
                                     SELECT v.title, v.id, v.cover
                                     FROM {VIDEOS_TABLE}_fts fts
@@ -1604,7 +1633,7 @@ def search_suggestions():
                                     WHERE h.username = ? AND fts.{VIDEOS_TABLE}_fts MATCH ?
                                     ORDER BY bm25(fts, 5.0, 10.0, 2.0, 1.0, 0.5) ASC, h.last_watched DESC
                                     LIMIT 5
-                                ''', (identifier, f"({fts_query_for_history})"))
+                                ''', (identifier, f"({safe_key_or})"))
                                 for row in cursor.fetchall():
                                     t = row[0].strip()
                                     if t:
