@@ -272,48 +272,8 @@ btnPlayPause.addEventListener('click', () => {
 });
 
 document.getElementById('btn-fullscreen').addEventListener('click', () => {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        let promise;
-        if (document.documentElement.requestFullscreen) {
-            promise = document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            promise = document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) {
-            promise = document.documentElement.msRequestFullscreen();
-        }
-        
-        const lockLandscape = () => {
-            const isPortrait = window.innerHeight > window.innerWidth;
-            if (isPortrait && screen.orientation && typeof screen.orientation.lock === 'function') {
-                screen.orientation.lock('landscape').catch(err => {
-                    console.warn("Orientation lock failed: ", err);
-                });
-            }
-        };
-
-        try {
-            history.pushState({ fullscreen: true }, '');
-        } catch(e) {}
-
-        if (promise && typeof promise.then === 'function') {
-            promise.then(lockLandscape).catch(err => {
-                console.warn("Fullscreen request failed: ", err);
-                if (history.state && history.state.fullscreen) {
-                    history.back();
-                }
-            });
-        } else {
-            setTimeout(lockLandscape, 200);
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    }
+    const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    toggleFullscreenMode(!isFS);
 });
 
 const handleFullscreenChange = () => {
@@ -665,6 +625,52 @@ document.addEventListener('contextmenu', e => {
     }
 });
 
+function toggleFullscreenMode(enable) {
+    const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    if (enable && !isFS) {
+        let promise;
+        if (document.documentElement.requestFullscreen) {
+            promise = document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            promise = document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            promise = document.documentElement.msRequestFullscreen();
+        }
+        
+        const lockLandscape = () => {
+            const isPortrait = window.innerHeight > window.innerWidth;
+            if (isPortrait && screen.orientation && typeof screen.orientation.lock === 'function') {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.warn("Orientation lock failed: ", err);
+                });
+            }
+        };
+
+        try {
+            history.pushState({ fullscreen: true }, '');
+        } catch(e) {}
+
+        if (promise && typeof promise.then === 'function') {
+            promise.then(lockLandscape).catch(err => {
+                console.warn("Fullscreen request failed: ", err);
+                if (history.state && history.state.fullscreen) {
+                    history.back();
+                }
+            });
+        } else {
+            setTimeout(lockLandscape, 200);
+        }
+    } else if (!enable && isFS) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
+
 function handleSwipe() {
     if (wasHolding) return;
     const dx = touchEndX - touchStartX;
@@ -687,10 +693,20 @@ function handleSwipe() {
             }
         }
     } else {
-        if (dy < 0) {
-            nextVideo();
+        if (isTopHalf) {
+            if (dy < -40) {
+                // Swiped UP in top half -> Enter Fullscreen
+                toggleFullscreenMode(true);
+            } else if (dy > 40) {
+                // Swiped DOWN in top half -> Exit Fullscreen
+                toggleFullscreenMode(false);
+            }
         } else {
-            prevVideo();
+            if (dy < 0) {
+                nextVideo();
+            } else {
+                prevVideo();
+            }
         }
     }
 }
