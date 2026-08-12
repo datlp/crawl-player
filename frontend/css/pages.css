@@ -73,22 +73,24 @@
 
 /* Tối ưu thumb-reach (tầm với ngón tay cái) ở màn hình ngang (Landscape - Mobile/Tablet/Laptop) */
 @media (orientation: landscape) {
-    #gallery-page {
+    #gallery-page,
+    #profile-page,
+    #details-page {
         left: auto;
         right: 0;
         width: min(380px, 85vw);
         box-shadow: -4px 0 16px rgba(0, 0, 0, 0.5);
         border-left: 1px solid rgba(255, 255, 255, 0.12);
     }
-    #gallery-page .gallery-grid {
+    .gallery-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
         padding: 10px;
     }
-    #gallery-page .gallery-item {
+    .gallery-item {
         gap: 6px;
     }
-    #gallery-page .item-title {
+    .item-title {
         font-size: 13px;
         line-height: 1.3;
     }
