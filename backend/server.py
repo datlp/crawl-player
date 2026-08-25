@@ -44,7 +44,8 @@ except ImportError as e:
     custom_log("System", "⚠️ Vui lòng cài đặt bằng lệnh: pip install curl_cffi beautifulsoup4 flask psutil")
     sys.exit(1)
 #  
-# Monkey patch curl_cffi.requests Session to monitor domain changes
+# Monkey patch curl_cffi.requests Session to monitor domain changes and enforce secure DNS (1.1.1.1 / 8.8.8.8)
+from curl_cffi import curl
 original_Session = curl_requests.Session
 
 def check_domain_change_callback(request_url, response):
@@ -85,6 +86,18 @@ def check_domain_change_callback(request_url, response):
         custom_log("System", f"⚠️ Lỗi check domain change callback: {e}")
 
 class PatchedSession(original_Session):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hasattr(self, 'curl') and self.curl:
+            try:
+                # Dùng DNS over HTTPS (DoH) qua Cloudflare 1.1.1.1 (hoặc Google 8.8.8.8) thay vì DNS hệ thống
+                self.curl.setopt(curl.CurlOpt.DOH_URL, b'https://1.1.1.1/dns-query')
+            except Exception as e:
+                try:
+                    self.curl.setopt(curl.CurlOpt.DOH_URL, b'https://dns.google/dns-query')
+                except Exception:
+                    pass
+
     def get(self, url, *args, **kwargs):
         res = super().get(url, *args, **kwargs)
         check_domain_change_callback(url, res)
