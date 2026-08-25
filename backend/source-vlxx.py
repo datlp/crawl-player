@@ -264,7 +264,7 @@ class Scraper:
                 
                 for server_num in servers_to_try:
                     payload = {
-                        'vlxx_server': '0',
+                        'vlxx_server': '1',
                         'id': numeric_id,
                         'server': str(server_num)
                     }
@@ -277,8 +277,11 @@ class Scraper:
                     
                     res = self.session.post(ajax_url, data=payload, headers=headers, timeout=15)
                     
-                    if res.status_code == 200:
-                        json_data = res.json()
+                    if res.status_code == 200 and res.text.strip():
+                        try:
+                            json_data = json.loads(res.text.strip())
+                        except Exception:
+                            json_data = {}
                         player_html = json_data.get('player')
                         if player_html:
                             soup = BeautifulSoup(player_html, 'html.parser')

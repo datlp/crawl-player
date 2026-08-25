@@ -160,9 +160,6 @@ class Scraper:
             driver.get(target_url)
             time.sleep(5) 
             
-            if hasattr(self, 'update_domain'):
-                self.update_domain(driver.current_url)
-                
             cookies = driver.get_cookies()
             cookie_pairs = []
             for c in cookies:
@@ -231,8 +228,17 @@ class Scraper:
             
         custom_log(self.source_name, f"⏳ Syncing {url}")
         try:
-            res = self.session.get(url, timeout=15)
-            html_text = res.text
+            res = None
+            for attempt in range(3):
+                try:
+                    res = self.session.get(url, timeout=15)
+                    if res.status_code in [200, 403, 503]:
+                        break
+                except Exception as ex:
+                    if attempt == 2: raise ex
+                    time.sleep(1)
+                    
+            html_text = res.text if res else ""
             
             if res.status_code in [403, 503] or "Just a moment..." in html_text:
                 html_text = self.bypass_cloudflare(url)
@@ -314,9 +320,14 @@ class Scraper:
         custom_log(self.source_name, f"⏳ Fetching video URL for {vid_id}")
         
         html_text = ""
-        res = self.session.get(target_url, timeout=15)
-        if res.status_code == 200 and "postid-" in res.text:
-            html_text = res.text
+        for _ in range(3):
+            try:
+                res = self.session.get(target_url, timeout=15)
+                if res.status_code == 200 and "postid-" in res.text:
+                    html_text = res.text
+                    break
+            except Exception:
+                time.sleep(1)
         else:
             html_text = self.bypass_cloudflare(target_url)
             
@@ -356,30 +367,34 @@ class Scraper:
         
         for server_num in servers_to_try:
             api_url = f"https://{self.domain}/wp-json/sextop1/player/?id={movie_id}&server={server_num}"
-            try:
-                res_api = self.session.get(api_url, headers=headers, timeout=15)
-                if res_api.status_code == 200:
-                    data_html = res_api.json().get("data", "")
-                    m3u8_match = re.search(r"file:\s*'([^']+index\.m3u8)'", data_html)
-                    if m3u8_match:
-                        m3u8_url = m3u8_match.group(1).replace(r"\/", "/")
-                        
-                        jw_key = ""
-                        key_match = re.search(r'jwplayer\.key\s*=\s*["\']([^"\']+)["\']', data_html)
-                        if key_match:
-                            jw_key = key_match.group(1)
-                            m3u8_url = f"{m3u8_url}#jwkey={jw_key}"
+            for attempt in range(2):
+                try:
+                    res_api = self.session.get(api_url, headers=headers, timeout=15)
+                    if res_api.status_code == 200:
+                        data_html = res_api.json().get("data", "")
+                        m3u8_match = re.search(r"file:\s*['\"]([^'\"]+\.m3u8[^'\"]*)['\"]", data_html) or \
+                                     re.search(r"file:\s*['\"]([^'\"]+)['\"]", data_html)
+                        if m3u8_match:
+                            m3u8_url = m3u8_match.group(1).replace(r"\/", "/")
                             
-                        with self.db_lock:
-                            cursor = self.db_conn.cursor()
-                            cursor.execute("INSERT OR REPLACE INTO play_configs (video_id, jwplayer_key, server) VALUES (?, ?, ?)", (vid_id, jw_key, str(server_num)))
-                            self.db_conn.commit()
-                            
-                        with self.memory_lock:
-                            self.db_buffer['video_urls'][vid_id] = m3u8_url
-                        return m3u8_url
-            except Exception as e:
-                custom_log(self.source_name, f"❌ Lỗi lấy API Link server {server_num}: {e}")
+                            jw_key = ""
+                            key_match = re.search(r'jwplayer\.key\s*=\s*["\']([^"\']+)["\']', data_html)
+                            if key_match:
+                                jw_key = key_match.group(1)
+                                m3u8_url = f"{m3u8_url}#jwkey={jw_key}"
+                                
+                            with self.db_lock:
+                                cursor = self.db_conn.cursor()
+                                cursor.execute("INSERT OR REPLACE INTO play_configs (video_id, jwplayer_key, server) VALUES (?, ?, ?)", (vid_id, jw_key, str(server_num)))
+                                self.db_conn.commit()
+                                
+                            with self.memory_lock:
+                                self.db_buffer['video_urls'][vid_id] = m3u8_url
+                            return m3u8_url
+                    break
+                except Exception as e:
+                    if attempt == 1:
+                        custom_log(self.source_name, f"❌ Lỗi lấy API Link server {server_num}: {e}")
             
         return None
 

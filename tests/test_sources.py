@@ -46,7 +46,8 @@ class PatchedSession(original_Session):
         super().__init__(*args, **kwargs)
         if hasattr(self, 'curl') and self.curl:
             try:
-                self.curl.setopt(curl.CurlOpt.DOH_URL, b'https://1.1.1.1/dns-query')
+                # Dùng DNS over HTTPS (DoH) qua Cloudflare 1.1.1.1 (hoặc Google 8.8.8.8) thay vì DNS hệ thống
+                self.curl.setopt(curl.CurlOpt.DOH_URL, b'https://cloudflare-dns.com/dns-query')
             except Exception:
                 try:
                     self.curl.setopt(curl.CurlOpt.DOH_URL, b'https://dns.google/dns-query')
