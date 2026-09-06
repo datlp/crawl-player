@@ -452,6 +452,21 @@ profilePage.addEventListener('touchend', e => {
     if (e.target.closest('#profile-tabs') || Math.abs(e.changedTouches[0].clientX - profileStartX) < 10) return; 
     const dx = e.changedTouches[0].clientX - profileStartX;
     const dy = e.changedTouches[0].clientY - profileStartY;
+
+    // Vuốt xuống (Swipe down) trên header hoặc khi đang ở đỉnh trang để đóng trang Cá nhân
+    if (dy > 60 && Math.abs(dy) > Math.abs(dx)) {
+        const isHeader = e.target.closest('.page-header');
+        const contentYou = document.getElementById('profile-content-you');
+        const gridEl = document.getElementById('profile-gallery-grid');
+        const isAtTop = (currentTab === 'you' ? (!contentYou || contentYou.scrollTop <= 0) : (!gridEl || gridEl.scrollTop <= 0));
+        if (isHeader || isAtTop) {
+            if (typeof closeProfilePage === 'function') {
+                closeProfilePage();
+                return;
+            }
+        }
+    }
+
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
         const currentIndex = profileTabsOrder.indexOf(currentTab || 'you');
         if (dx > 0) {

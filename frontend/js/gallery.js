@@ -204,6 +204,19 @@ galleryPage.addEventListener('touchend', e => {
     if (e.target.closest('#gallery-tabs') || e.target.closest('#search-suggestions') || Math.abs(e.changedTouches[0].clientX - galleryStartX) < 10) return; 
     const dx = e.changedTouches[0].clientX - galleryStartX;
     const dy = e.changedTouches[0].clientY - galleryStartY;
+
+    // Vuốt xuống (Swipe down) trên thanh tìm kiếm/header hoặc khi đang ở đỉnh trang để đóng Gallery
+    if (dy > 60 && Math.abs(dy) > Math.abs(dx)) {
+        const isHeader = e.target.closest('#search-container');
+        const isAtTop = !galleryGrid || galleryGrid.scrollTop <= 0;
+        if (isHeader || isAtTop) {
+            if (typeof closeGalleryPage === 'function') {
+                closeGalleryPage();
+                return;
+            }
+        }
+    }
+
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
         const currentIndex = galleryTabsOrder.indexOf(currentTab || 'all');
         if (dx > 0) {

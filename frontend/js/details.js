@@ -198,6 +198,22 @@ detailsPage.addEventListener('touchstart', e => {
 detailsPage.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - detailStartX;
     const dy = e.changedTouches[0].clientY - detailStartY;
+    
+    // Vuốt xuống (Swipe down) để đóng / ẩn drawer chi tiết video
+    if (dy > 60 && Math.abs(dy) > Math.abs(dx)) {
+        const isHeader = e.target.closest('.page-header');
+        const contentEl = document.getElementById('details-content');
+        const isAtTop = !contentEl || contentEl.scrollTop <= 0;
+        
+        if (isHeader || isAtTop) {
+            if (typeof closeDetailsPage === 'function') {
+                closeDetailsPage();
+                return;
+            }
+        }
+    }
+
+    // Vuốt ngang chuyển video trước/kế tiếp
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
         if (dx > 0) {
             if (currentDetailIndex > 0) {
